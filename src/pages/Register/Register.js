@@ -69,16 +69,24 @@ const register = css`
     font-weight: 600;
 `;
 
+const errorMsg = css`
+    margin-left: 5px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: red;
+`;
+
 const Register = () => {
 
     const [registerUser, setRegisterUser] = useState({email:"", password:"", name:""});
+    const [errorMessages, setErrorMessages] =useState({email:"", password:"", name:""});
 
     const onChangeHandle = (e) => {
         const { name, value } = e.target;
         setRegisterUser({...registerUser, [name]: value})
     }
 
-    const registeSubmit = () => {
+    const registeSubmit = async () => {
         const data = {
             ...registerUser
         }
@@ -88,20 +96,24 @@ const Register = () => {
                 "Content-Type":"application/json"
             }
         }
+        try {
+            const response = await axios.post("http://localhost:8080/auth/signup", JSON.stringify(data), option)
+            setErrorMessages({email: "", password: "", name: ""});
+        } catch(error) {
+            setErrorMessages({email: "", password: "", name: "", ...error.response.data.errorData});
+        }
         // axios(비동기) : 요청 날릴 때 사용함
-        axios
-        .post("http://localhost:8080/auth/signup", JSON.stringify(data), option)
-        .then(response => {
-            console.log("성공");
-            console.log(response);
-        })
-        .catch(error => {
-            console.log("에러");
-            console.log(error.response.data.errorData);
-        });
+        // callback 함수               / *** await : 혼자는 못씀 async 함수 안에서만 사용 가능 ***
+        // .then(response => {
+        //     setErrorMessages({email: "", password: "", name: ""});
+        //     console.log(response);
+        // })
+        // .catch(error => {
+        //     setErrorMessages({email: "", password: "", name: "", ...error.response.data.errorData});
+        // });
         // 동기 - 요청과 결과가 동시에 일어남 (/결과가 나올때까지 다른 행동 못함)
         // 비동기 - 동시에 일어나지 않음 (/결과가 나오는 동안 다른 행동 가능)
-        console.log("비동기 테스트");
+        // console.log("비동기 테스트");
     }
 
     return (
@@ -115,14 +127,19 @@ const Register = () => {
                     <LoginInput type="email" placeholder="Type your email" onChange={onChangeHandle} name="email">
                         <FiUser />
                     </LoginInput>
+                    <div css={errorMsg}>{errorMessages.email}</div>
+
                     <label css={inputLabel}>Password</label>
                     <LoginInput type="password" placeholder="Type your password" onChange={onChangeHandle} name="password">
                         <FiLock />
                     </LoginInput>
+                    <div css={errorMsg}>{errorMessages.password}</div>
+
                     <label css={inputLabel}>Name</label>
                     <LoginInput type="text" placeholder="Type your name" onChange={onChangeHandle} name="name">
                         <BiRename />
                     </LoginInput>
+                    <div css={errorMsg}>{errorMessages.name}</div>
                     
                     <button css={loginButton} onClick={registeSubmit}>REGISTER</button>
                 </div>

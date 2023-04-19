@@ -5,7 +5,7 @@ import Input from '../../atoms/Input/Input';
 
 const loginInput = css`
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     border-bottom: 1px solid #dbdbdb;
     padding: 0px 5px 0px 40px;
     width: 100%;
