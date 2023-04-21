@@ -3,7 +3,7 @@ import { css } from "@emotion/react";
 import React, { useState } from 'react';
 import LoginInput from '../../components/UI/Login/LoginInput/LoginInput';
 import { FiUser, FiLock } from 'react-icons/fi';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BiRename } from 'react-icons/bi';
 import axios from "axios";
 
@@ -78,8 +78,10 @@ const errorMsg = css`
 
 const Register = () => {
 
-    const [registerUser, setRegisterUser] = useState({email:"", password:"", name:""});
-    const [errorMessages, setErrorMessages] =useState({email:"", password:"", name:""});
+    const navigate = useNavigate();
+
+    const [registerUser, setRegisterUser] = useState({email: "", password: "", name: ""});
+    const [errorMessages, setErrorMessages] =useState({email: "", password: "", name: ""});
 
     const onChangeHandle = (e) => {
         const { name, value } = e.target;
@@ -99,6 +101,8 @@ const Register = () => {
         try {
             const response = await axios.post("http://localhost:8080/auth/signup", JSON.stringify(data), option)
             setErrorMessages({email: "", password: "", name: ""});
+            alert("회원가입 성공!");
+            navigate("/login");
         } catch(error) {
             setErrorMessages({email: "", password: "", name: "", ...error.response.data.errorData});
         }

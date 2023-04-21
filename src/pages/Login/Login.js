@@ -1,11 +1,14 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import React from 'react';
+import React, { useState } from 'react';
 import LoginInput from '../../components/UI/Login/LoginInput/LoginInput';
 import { FiUser, FiLock } from 'react-icons/fi';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BsGoogle } from 'react-icons/bs';
 import { SiNaver, SiKakao } from 'react-icons/si';
+import axios from "axios";
+import { authenticated } from '../../index';
+import { useRecoilState } from "recoil";
 
 const container = css`
     display: flex;
@@ -103,7 +106,45 @@ const register = css`
     font-weight: 600;
 `;
 
+const errorMsg = css`
+    margin-left: 5px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: red;
+`;
+
 const Login = () => {
+
+    const [ loginUser, setLoginUser ] = useState({email: "", password: ""});
+    const [ errorMessages, setErrorMessages ] = useState({email: "", password: ""});
+    const [ auth, setAuth ] = useRecoilState(authenticated);
+    const navigate = useNavigate();
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setLoginUser({...loginUser, [name]: value})
+    }
+
+    const loginHandleSubmit = async () => {
+        const option = {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }
+        try {
+            const response = await axios.post("http://localhost:8080/auth/login", JSON.stringify(loginUser), option);
+            setErrorMessages({email: "", password: ""});
+            const accessToken = response.data.grantType + " " + response.data.accessToken;
+            localStorage.setItem("accessToken", accessToken);
+            setAuth(true);
+            navigate("/");
+
+        } catch(error) {
+            console.log(error);
+            setErrorMessages({email: "", password: "", ...error.response.data.errorData});
+        }
+    }
+
     return (
         <div css={container}>
             <header>
@@ -112,15 +153,19 @@ const Login = () => {
             <main css={mainContainer}>
                 <div css={authForm}>
                     <label css={inputLabel}>Email</label>
-                    <LoginInput type="email" placeholder="Type your email">
+                    <LoginInput type="email" placeholder="Type your email" onChange={handleChange} name="email">
                         <FiUser />
                     </LoginInput>
+                    <div css={errorMsg}>{errorMessages.email}</div>
+
                     <label css={inputLabel}>Password</label>
-                    <LoginInput type="password" placeholder="Type your password">
+                    <LoginInput type="password" placeholder="Type your password" onChange={handleChange} name="password">
                         <FiLock />
                     </LoginInput>
+                    <div css={errorMsg}>{errorMessages.password}</div>
+
                     <div css={forgotPassword}><Link to='/forgot/password'>Forgot Password?</Link></div>
-                    <button css={loginButton}>LOGIN</button>
+                    <button css={loginButton} onClick={loginHandleSubmit}>LOGIN</button>
                 </div>
             </main>
 
