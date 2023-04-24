@@ -37,12 +37,17 @@ export const Reset = css`
         display: block;
     }
     body {
+        line-height: 1;
+    }
+    #root {
+        position: relative;
         margin: 10px auto;
         border: 3px solid #dbdbdb;
         border-radius: 10px;
-        width: 768px;
-        height: 1000px;
-        line-height: 1;
+        padding: 10px;
+        width: 750px;
+        height: 900px;
+        overflow: hidden;
     }
     ol, ul {
         list-style: none;
