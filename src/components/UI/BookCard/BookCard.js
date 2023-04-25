@@ -83,21 +83,21 @@ const footer = css`
     padding-right: 5px;
  `;
 
-const BookCard = () => {
+const BookCard = ({ book }) => {
     return (
         <div css={cardContainer}>
             <header css={header}>
-                <h1 css={titleText}> 내 통장 사용 설명서 (통장 7개로 시작하는 세상에서 제일 쉬운 재테크)</h1>
+                <h1 css={titleText}>{book.bookName}</h1>
             </header>
             <main css={main}>
                 <div css={imgBox}>
-                    <img css={img} src="https://epbook.eplib.or.kr/resources/images/opms/9788901101101.jpg" alt=" 내 통장 사용 설명서 (통장 7개로 시작하는 세상에서 제일 쉬운 재테크)" />
+                    <img css={img} src={book.coverImgUrl} alt={book.bookName} />
                 </div>
             </main>
             <footer css={footer}>
                 <div css={like}><div css={likeIcon}><AiOutlineLike /></div>추천: 10</div>
-                <h2>저자명: 이천</h2>
-                <h2>출판사: 웅진윙스</h2>
+                <h2>저자명: {book.authorName}</h2>
+                <h2>출판사: {book.publisherName}</h2>
             </footer>   
         </div>
     );
