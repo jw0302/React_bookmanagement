@@ -6,6 +6,7 @@ import BookCard from '../../components/UI/BookCard/BookCard';
 import axios from "axios";
 import { useQuery } from "react-query";
 import { BsMenuDown } from 'react-icons/bs'
+import QueryString from "qs";
 
 const mainContainer = css`
     padding: 10px;
@@ -98,7 +99,8 @@ const Main = () => {
         params: searchParam,
         headers: {
             Authorization: localStorage.getItem("accessToken")
-        }
+        },
+        paramsSerializer: params => QueryString.stringify(params, {arrayFormat: 'repeat'})
     }
 
     const searchBooks = useQuery(["searchBooks"], async () => {
@@ -115,9 +117,10 @@ const Main = () => {
             setBooks([...books, ...response.data.bookList]);
             setSearchParam({...searchParam, page: searchParam.page + 1});
         },
-        enabled: refresh && searchParam.page < lastPage + 1
+        enabled: refresh && (searchParam.page < lastPage + 1 || lastPage === 0)
     });
 
+    // async () => {} : 문법 자체가 Promise 함수 / async 있는 함수에만 await 사용 가능, await : 이걸 써야 Promise안에서 callback함수 사용가능
     const categories = useQuery(["categories"], async () => {
         const option = {
             headers: {
@@ -146,15 +149,30 @@ const Main = () => {
         setIsOpen(prevIsOpen => !prevIsOpen);
     }
 
+    // 내가 만든 코드 -> 카테고리 버튼 열고 닫힘버튼이 잘안되는걸 해결해줌
     const checkboxClickHandle = (e) => {
         e.stopPropagation();
     }
 
     const categoryCheckHandle = (e) => {
         if(e.target.checked) {
-            setSearchParam({...searchParam, categoryIds: [...searchParam.categoryIds, e.target.value]});
+            setSearchParam({...searchParam, page: 1, categoryIds: [...searchParam.categoryIds, e.target.value]});
         } else {
-            setSearchParam({...searchParam, categoryIds:[...searchParam.categoryIds.filter(id => id !== e.target.value)]});
+            setSearchParam({...searchParam, page: 1, categoryIds:[...searchParam.categoryIds.filter(id => id !== e.target.value)]});
+        }
+        setBooks([]);
+        setRefresh(true);
+    }
+
+    const searchInputHandle = (e) => {
+        setSearchParam({...searchParam, searchValue: e.target.value});
+    }
+
+    const searchSubmitHandle = (e) => {
+        if(e.keyCode === 13) {
+            setSearchParam({...searchParam, page: 1});
+            setBooks([]);
+            setRefresh(true);
         }
     }
 
@@ -176,7 +194,7 @@ const Main = () => {
                                 : ""}
                         </div>
                     </button>
-                    <input css={searchInput} type="search" />
+                    <input css={searchInput} type="search" onKeyUp={searchSubmitHandle} onChange={searchInputHandle} />
                 </div>
             </header>
             <main css={main}>
